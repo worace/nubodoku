@@ -1,5 +1,8 @@
 (ns robodoku.core
-  (:require [clojure.string :refer [split join]]))
+  (:require [clojure.string :refer [split join]]
+            [clojure.set :refer [union]]))
+
+(defn sqrt [num] (int (Math/sqrt num)))
 
 (def alphabet (map (comp str char) (range 65 91)))
 
@@ -20,3 +23,23 @@
                           (iterate inc 1)))
                     (lines path)
                     alphabet)))
+
+(defn row [cell size]
+  (disj (set (map (partial str (first cell))
+                  (take size (iterate inc 1))))
+        cell))
+
+(defn col [cell size]
+  (disj (set (map #(str % (last cell))
+                  (take size alphabet)))
+        cell))
+
+(defn block [cell size]
+  (disj (set (for [row (take (sqrt size) alphabet)
+                   col (take (sqrt size) (iterate inc 1))]
+               (str row col)))
+        cell))
+
+(defn units [cell size] (set ((juxt row col block) cell size)))
+
+(defn peers [cell size] (reduce union (units cell size)))
