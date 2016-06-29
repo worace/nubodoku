@@ -21,10 +21,11 @@
 (def alphabet (map (comp str char) (range 65 91)))
 
 (defn lines [file] (-> file slurp (split #"\n")))
+(defn square-values [puzzle-size] (set (range 1 (inc puzzle-size))))
 
 (defn cell-possibilities [str puzzle-size]
   (case str
-    " " (set (range 1 (inc puzzle-size)))
+    " " (square-values puzzle-size)
     #{(Integer/parseInt str)}))
 
 (defn read-puzzle [path]
@@ -66,35 +67,68 @@
 
 (defn rows [puzzle]
   (for [r (take (size puzzle) alphabet)]
-    (map str
-         (repeat r)
-         (range 1 (inc (size puzzle))))))
+    (set (map str
+              (repeat r)
+              (range 1 (inc (size puzzle)))))))
 
 (defn cols [puzzle]
   (for [c (range 1 (inc (size puzzle)))]
-    (map str
-         (take (size puzzle) alphabet)
-         (repeat c))))
+    (set (map str
+              (take (size puzzle) alphabet)
+              (repeat c)))))
 
 (defn blocks [puzzle]
   (for [block-rows (partition (sqrt (size puzzle))
                               (take (size puzzle) alphabet))
         block-cols (partition (sqrt (size puzzle))
                               (range 1 (inc (size puzzle))))]
-    (for [r block-rows c block-cols] (str r c))))
+    (set (for [r block-rows c block-cols] (str r c)))))
+
+(defn p-units [puzzle] (reduce union ((juxt rows cols blocks) puzzle)))
+
+(defn solved-squares [puzzle]
+  (filter (fn [[sq possibilities]]
+            (= 1 (count possibilities)))
+          puzzle))
+
+(defn eliminate-fixed-values-from-peers [puzzle]
+  ;; If any cell has only 1 value, remove that value from its peers
+  (reduce (fn [puzzle [sq possibilities]]
+            (reduce (fn [puzzle peer]
+                      (update puzzle peer difference possibilities))
+                    puzzle
+                    (peers sq (size puzzle))))
+          puzzle
+          (solved-squares puzzle)))
+
+(defn sole-candidate [puzzle unit value]
+  (let [candidates (filter (fn [sq] (contains? (puzzle sq) value))
+                           unit)]
+    (if (= 1 (count candidates))
+      (first candidates)
+      nil)))
+
+(defn sole-candidates [puzzle unit]
+  (apply hash-map (mapcat (fn [unit value]
+                            (if-let [square (sole-candidate puzzle unit value)]
+                              [square value]
+                              []))
+                          (repeat unit)
+                          (square-values (size puzzle)))))
+
+(defn assign-sole-candidate-values [puzzle]
+  (->> (p-units puzzle)
+       (map (partial sole-candidates puzzle))
+       (reduce merge)
+       (reduce (fn [puzzle [square value]]
+                 (assoc puzzle square #{value}))
+               puzzle)
+       ))
 
 (defn constrain [puzzle]
-  ;; If any cell has only 1 value, remove that value from its peers
-  (let [single-value-squares (filter (fn [[sq possibilities]]
-                                       (= 1 (count possibilities)))
-                                     puzzle)]
-    (reduce (fn [puzzle [sq possibilities]]
-              (reduce (fn [puzzle peer]
-                        (update puzzle peer difference possibilities))
-                      puzzle
-                      (peers sq (size puzzle))))
-            puzzle
-            single-value-squares))
+  (-> puzzle
+      eliminate-fixed-values-from-peers
+      assign-sole-candidate-values)
   ;; If any unit has only 1 candidate for a value, assign the value to that cell
   )
 

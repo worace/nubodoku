@@ -55,9 +55,24 @@
   (let [p (read-puzzle "resources/puzzles/four_by_four.txt")]
     (is (= 4 (count (rows p))))
     (is (= 4 (count (cols p))))
-    (is (= ["A1" "A2" "A3" "A4"] (first (rows p))))
-    (is (= ["A4" "B4" "C4" "D4"] (last (cols p))))
     (is (= 4 (count (blocks p))))
+    (is (some #(= #{"A1" "A2" "A3" "A4"} %) (rows p)))
+    (is (some #(= #{"A4" "B4" "C4" "D4"} %) (cols p)))
+    (is (some #(= #{"A1" "A2" "B1" "B2"} %) (blocks p)))
+    (is (= 12 (count (p-units p))))))
+
+(deftest assigning-from-candidacy
+  (let [p (read-puzzle "resources/puzzles/four_by_four.txt")]
+    (is (= {"D2" 3}
+           (sole-candidates p #{"A2" "B2" "C2" "D2"})))
+    (is (= {"D2" 3}
+           (sole-candidates p #{"C1" "C2" "D1" "D2"})))
+    (is (= {"D2" 3}
+           (sole-candidates p #{"C1" "C2" "D1" "D2"})))
+    (is (= #{3} (get (assign-sole-candidate-values p)
+                     "D2")))
+    (is (= #{1} (get (assign-sole-candidate-values p)
+                     "D3")))
     ))
 
 (run-tests)
