@@ -1,5 +1,6 @@
 (ns robodoku.core-test
   (:require [clojure.test :refer :all]
+            [clojure.pprint :refer [pprint]]
             [robodoku.core :refer :all]))
 
 (deftest reading-a-puzzle
@@ -11,7 +12,8 @@
            (set (keys p))))
 
     (is (= #{3} (p "A1")))
-    (is (= #{1 2 3 4} (p "D2")))))
+    (is (= #{1 2 3 4} (p "D2")))
+    (is (= #{1 2 3 4} (p "D3")))))
 
 (deftest units-and-peers
   (is (= #{"A2" "A3" "A4"} (row "A1" 4)))
@@ -24,13 +26,29 @@
            "B1" "C1" "D1"
            "B2"} (peers "A1" 4)))
 
-  (is (= #{"A2", "B2", "D2", "E2", "F2", "G2", "H2", "I2", "C1", "C3",
-           "C4", "C5", "C6", "C7", "C8", "C9", "A1", "A3", "B1", "B3"}
+  (is (= #{"A1" "A2" "A3"
+           "B4" "C4" "D4"
+           "B3"}
+         (peers "A4" 4)))
+
+  (is (= #{"C1" "C2" "C4"
+           "A3" "B3" "D3"
+           "D4"}
+         (peers "C3" 4)))
+
+  (is (= #{"A2", "B2", "D2", "E2", "F2", "G2", "H2", "I2",
+           "C1", "C3", "C4", "C5", "C6", "C7", "C8", "C9",
+           "A1", "A3", "B1", "B3"}
          (peers "C2" 9)))
 
   (is (= #{#{"A2" "A3" "A4"}
            #{"B1" "C1" "D1"}
            #{"A2" "B1" "B2"}}
          (units "A1" 4))))
+
+(deftest propagating-constraints-on-a-puzzle
+  (let [p (read-puzzle "resources/puzzles/four_by_four.txt")]
+    (is (= (read-puzzle "resources/puzzles/four_by_four_solved.txt")
+           (constrain p)))))
 
 (run-tests)
