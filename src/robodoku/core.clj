@@ -117,6 +117,8 @@
                           (square-values (size puzzle)))))
 
 (defn assign-sole-candidate-values [puzzle]
+  ;; If any unit has only 1 candidate square for a value,
+  ;; assign the value to that square
   (->> (p-units puzzle)
        (map (partial sole-candidates puzzle))
        (reduce merge)
@@ -129,7 +131,6 @@
   (-> puzzle
       eliminate-fixed-values-from-peers
       assign-sole-candidate-values)
-  ;; If any unit has only 1 candidate for a value, assign the value to that cell
   )
 
 
