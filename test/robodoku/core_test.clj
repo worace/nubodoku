@@ -46,11 +46,6 @@
            #{"A2" "B1" "B2"}}
          (units "A1" 4))))
 
-(deftest propagating-constraints-on-a-puzzle
-  (let [p (read-puzzle "resources/puzzles/four_by_four.txt")]
-    (is (= (read-puzzle "resources/puzzles/four_by_four_solved.txt")
-           (constrain p)))))
-
 (deftest units-for-a-whole-puzzle
   (let [p (read-puzzle "resources/puzzles/four_by_four.txt")]
     (is (= 4 (count (rows p))))
@@ -74,5 +69,11 @@
     (is (= #{1} (get (assign-sole-candidate-values p)
                      "D3")))
     ))
+
+(deftest propagating-constraints-on-a-puzzle
+  (is (= (read-puzzle "resources/puzzles/four_by_four_solved.txt")
+         (constrain (read-puzzle "resources/puzzles/four_by_four.txt"))))
+  (is (= (read-puzzle "resources/puzzles/easy_solution.txt")
+         (constrain (constrain (read-puzzle "resources/puzzles/easy.txt"))))))
 
 (run-tests)
