@@ -51,4 +51,13 @@
     (is (= (read-puzzle "resources/puzzles/four_by_four_solved.txt")
            (constrain p)))))
 
+(deftest units-for-a-whole-puzzle
+  (let [p (read-puzzle "resources/puzzles/four_by_four.txt")]
+    (is (= 4 (count (rows p))))
+    (is (= 4 (count (cols p))))
+    (is (= ["A1" "A2" "A3" "A4"] (first (rows p))))
+    (is (= ["A4" "B4" "C4" "D4"] (last (cols p))))
+    (is (= 4 (count (blocks p))))
+    ))
+
 (run-tests)

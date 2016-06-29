@@ -64,20 +64,37 @@
 
 (defn size [puzzle] (sqrt (count puzzle)))
 
+(defn rows [puzzle]
+  (for [r (take (size puzzle) alphabet)]
+    (map str
+         (repeat r)
+         (range 1 (inc (size puzzle))))))
+
+(defn cols [puzzle]
+  (for [c (range 1 (inc (size puzzle)))]
+    (map str
+         (take (size puzzle) alphabet)
+         (repeat c))))
+
+(defn blocks [puzzle]
+  (for [block-rows (partition (sqrt (size puzzle))
+                              (take (size puzzle) alphabet))
+        block-cols (partition (sqrt (size puzzle))
+                              (range 1 (inc (size puzzle))))]
+    (for [r block-rows c block-cols] (str r c))))
+
 (defn constrain [puzzle]
+  ;; If any cell has only 1 value, remove that value from its peers
   (let [single-value-squares (filter (fn [[sq possibilities]]
                                        (= 1 (count possibilities)))
                                      puzzle)]
     (reduce (fn [puzzle [sq possibilities]]
-              (println "sq" sq "has only" possibilities)
               (reduce (fn [puzzle peer]
-                        (println "removing" possibilities "from" peer)
                         (update puzzle peer difference possibilities))
                       puzzle
                       (peers sq (size puzzle))))
             puzzle
             single-value-squares))
-  ;; If any cell has only 1 value, remove that value from its peers
   ;; If any unit has only 1 candidate for a value, assign the value to that cell
   )
 
