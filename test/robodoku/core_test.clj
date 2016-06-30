@@ -78,9 +78,16 @@
          (constrain (constrain (read-puzzle "easy.txt"))))))
 
 (deftest find-easiest-unsolved-square
-  (is true)
   (is (#{"D3" "D2"}
        (easiest-square (read-puzzle "four_by_four.txt")))))
+
+(deftest solve-puzzle-with-search
+  (let [p (read-puzzle "puzzle_0.txt")
+        s (read-puzzle "solution_0.txt")]
+    (is (not (= s (-> p
+                      constrain
+                      constrain))))
+    (is (= s (solve p)))))
 
 ;; 3241
 ;; 4132
@@ -97,6 +104,9 @@
 (deftest detecting-solved-puzzle
   (is (not (solved? (read-puzzle "four_by_four.txt"))))
   (is (solved? (assoc (read-puzzle "four_by_four.txt")
-                      "D2" #{3} "D3" #{1}))))
+                      "D2" #{3} "D3" #{1})))
+  ;; contradictory puzzle is not solved:
+  (is (not (solved? (assoc (read-puzzle "four_by_four.txt")
+                           "D2" #{1} "D3" #{3})))))
 
 (run-tests)

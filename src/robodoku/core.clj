@@ -169,16 +169,23 @@
                                  (sort (square-values (size puzzle))))))))
 
 (defn search [puzzle]
-  ;; if puzzle is solved, return it
-  ;; if puzzle has any contradictions, return false/nil
-  ;; if puzzle is false/nil...? (need this case?)
+  (cond
+    (solved? puzzle) puzzle
+    (contradictory? puzzle) (do (println "found contradiction in branch, discarding...")
+                                nil)
+    :else (let [ez-sq (easiest-square puzzle)
+                possibilities (puzzle ez-sq)]
+            (some (fn [value]
+                    (-> puzzle
+                        (assoc ez-sq #{value})
+                        (constrain)
+                        (search)))
+                  possibilities))))
 
-  ;; otherwise keep going down the search:
-  ;; - pick the next easiest square
-  ;; - pick one of its possibilities and assign it
-  ;; - then constrain the puzzle
-  ;; - then keep searching...
-  )
+(defn solve [puzzle]
+  (-> puzzle
+      constrain
+      search))
 
 ;; 4x4
 ;; A1 A2 A3 A4
