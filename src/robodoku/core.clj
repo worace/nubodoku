@@ -28,16 +28,18 @@
     " " (square-values puzzle-size)
     #{(Integer/parseInt str)}))
 
-(defn read-puzzle [filename]
-  (into {} (mapcat (fn [row row-name]
-                     (map (fn [cell-value row-number]
-                            [(str row-name row-number)
-                             (cell-possibilities (str cell-value)
-                                                 (count row))])
-                          row
-                          (iterate inc 1)))
-                    (lines (str "resources/puzzles/" filename))
-                    alphabet)))
+(defn read-puzzle
+  ([filename] (read-puzzle filename "resources/puzzles"))
+  ([filename dir]
+   (into {} (mapcat (fn [row row-name]
+                      (map (fn [cell-value row-number]
+                             [(str row-name row-number)
+                              (cell-possibilities (str cell-value)
+                                                  (count row))])
+                           row
+                           (iterate inc 1)))
+                    (lines (str dir "/" filename))
+                    alphabet))))
 
 (defn row [cell size]
   (disj (set (map (partial str (first cell))
@@ -171,8 +173,7 @@
 (defn search [puzzle]
   (cond
     (solved? puzzle) puzzle
-    (contradictory? puzzle) (do (println "found contradiction in branch, discarding...")
-                                nil)
+    (contradictory? puzzle) nil
     :else (let [ez-sq (easiest-square puzzle)
                 possibilities (puzzle ez-sq)]
             (some (fn [value]

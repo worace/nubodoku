@@ -1,5 +1,6 @@
 (ns robodoku.core-test
   (:require [clojure.test :refer :all]
+            [clojure.java.io :as io]
             [clojure.tools.namespace.repl :refer [refresh]]
             [clojure.pprint :refer [pprint]]
             [robodoku.core :refer :all]))
@@ -81,19 +82,6 @@
   (is (#{"D3" "D2"}
        (easiest-square (read-puzzle "four_by_four.txt")))))
 
-(deftest solve-puzzle-with-search
-  (let [p (read-puzzle "puzzle_0.txt")
-        s (read-puzzle "solution_0.txt")]
-    (is (not (= s (-> p
-                      constrain
-                      constrain))))
-    (is (= s (solve p)))))
-
-;; 3241
-;; 4132
-;; 1423
-;; 2  4
-
 (deftest recognizing-contradictory-assignments
   (is (not (contradictory? (-> "four_by_four.txt"
                                read-puzzle))))
@@ -108,5 +96,27 @@
   ;; contradictory puzzle is not solved:
   (is (not (solved? (assoc (read-puzzle "four_by_four.txt")
                            "D2" #{1} "D3" #{3})))))
+
+(deftest solve-puzzle-with-search
+  (let [p (read-puzzle "puzzle_0.txt")
+        s (read-puzzle "solution_0.txt")]
+    (is (not (= s (-> p
+                      constrain
+                      constrain))))
+    (is (= s (solve p)))))
+
+(deftest solve-bunch-of-puzzles
+  (let [puzzle-dir "resources/examples-with-solutions/puzzles"
+        solution-dir "resources/examples-with-solutions/solutions"
+        puzzles (->> puzzle-dir
+                     (io/file)
+                     (file-seq)
+                     (drop 1)
+                     (map #(.getName %)))]
+    (doseq [fname puzzles]
+      (println "Attempting puzzle" fname "...")
+      (let [puzzle (read-puzzle fname puzzle-dir)
+            solution (read-puzzle fname solution-dir)]
+        (is (= solution (solve puzzle)))))))
 
 (run-tests)
