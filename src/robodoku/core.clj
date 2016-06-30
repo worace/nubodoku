@@ -28,7 +28,7 @@
     " " (square-values puzzle-size)
     #{(Integer/parseInt str)}))
 
-(defn read-puzzle [path]
+(defn read-puzzle [filename]
   (into {} (mapcat (fn [row row-name]
                      (map (fn [cell-value row-number]
                             [(str row-name row-number)
@@ -36,7 +36,7 @@
                                                  (count row))])
                           row
                           (iterate inc 1)))
-                    (lines path)
+                    (lines (str "resources/puzzles/" filename))
                     alphabet)))
 
 (defn row [cell size]

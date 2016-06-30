@@ -1,10 +1,11 @@
 (ns robodoku.core-test
   (:require [clojure.test :refer :all]
+            [clojure.tools.namespace.repl :refer [refresh]]
             [clojure.pprint :refer [pprint]]
             [robodoku.core :refer :all]))
 
 (deftest reading-a-puzzle
-  (let [p (read-puzzle "resources/puzzles/four_by_four.txt")]
+  (let [p (read-puzzle "four_by_four.txt")]
     (is (= #{"A1" "A2" "A3" "A4"
              "B1" "B2" "B3" "B4"
              "C1" "C2" "C3" "C4"
@@ -47,7 +48,7 @@
          (units "A1" 4))))
 
 (deftest units-for-a-whole-puzzle
-  (let [p (read-puzzle "resources/puzzles/four_by_four.txt")]
+  (let [p (read-puzzle "four_by_four.txt")]
     (is (= 4 (count (rows p))))
     (is (= 4 (count (cols p))))
     (is (= 4 (count (blocks p))))
@@ -57,7 +58,7 @@
     (is (= 12 (count (p-units p))))))
 
 (deftest assigning-from-candidacy
-  (let [p (read-puzzle "resources/puzzles/four_by_four.txt")]
+  (let [p (read-puzzle "four_by_four.txt")]
     (is (= {"D2" 3}
            (sole-candidates p #{"A2" "B2" "C2" "D2"})))
     (is (= {"D2" 3}
@@ -71,13 +72,17 @@
     ))
 
 (deftest propagating-constraints-on-a-puzzle
-  (is (= (read-puzzle "resources/puzzles/four_by_four_solved.txt")
-         (constrain (read-puzzle "resources/puzzles/four_by_four.txt"))))
-  (is (= (read-puzzle "resources/puzzles/easy_solution.txt")
-         (constrain (constrain (read-puzzle "resources/puzzles/easy.txt"))))))
+  (is (= (read-puzzle "four_by_four_solved.txt")
+         (constrain (read-puzzle "four_by_four.txt"))))
+  (is (= (read-puzzle "easy_solution.txt")
+         (constrain (constrain (read-puzzle "easy.txt"))))))
 
 (deftest find-easiest-unsolved-square
+  (is true)
   (is (#{"D3" "D2"}
-       (easiest-square (read-puzzle "resources/puzzles/four_by_four.txt")))))
+       (easiest-square (read-puzzle "four_by_four.txt")))))
+
+(deftest recognizing-contradictory-assignments
+  )
 
 (run-tests)
