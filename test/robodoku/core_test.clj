@@ -82,7 +82,21 @@
   (is (#{"D3" "D2"}
        (easiest-square (read-puzzle "four_by_four.txt")))))
 
+;; 3241
+;; 4132
+;; 1423
+;; 2  4
+
 (deftest recognizing-contradictory-assignments
-  )
+  (is (not (contradictory? (-> "four_by_four.txt"
+                               read-puzzle))))
+  (is (contradictory? (-> "four_by_four.txt"
+                          read-puzzle
+                          (assoc "A1" #{1})))))
+
+(deftest detecting-solved-puzzle
+  (is (not (solved? (read-puzzle "four_by_four.txt"))))
+  (is (solved? (assoc (read-puzzle "four_by_four.txt")
+                      "D2" #{3} "D3" #{1}))))
 
 (run-tests)

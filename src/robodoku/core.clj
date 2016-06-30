@@ -140,6 +140,34 @@
        (first)
        (first)))
 
+(defn known-values [puzzle unit]
+  (->> unit
+       (map puzzle)
+       (filter #(= 1 (count %)))
+       (apply concat)))
+
+(defn unit-contradicts?
+  "Of the 'determined' squares (those with only a single remaining
+   possibility), do any of them overlap?"
+  [puzzle unit]
+  (->> unit
+       (known-values puzzle)
+       (frequencies)
+       (some (fn [[value frequency]] (> frequency 1)))))
+
+(defn contradictory? [puzzle]
+  (->> puzzle
+       p-units
+       (some (partial unit-contradicts? puzzle))))
+
+(defn solved? [puzzle]
+  (->> puzzle
+       (p-units)
+       (map (partial known-values puzzle))
+       (map sort)
+       (every? (fn [u-values] (= u-values
+                                 (sort (square-values (size puzzle))))))))
+
 (defn search [puzzle]
   ;; if puzzle is solved, return it
   ;; if puzzle has any contradictions, return false/nil
