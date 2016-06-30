@@ -76,4 +76,8 @@
   (is (= (read-puzzle "resources/puzzles/easy_solution.txt")
          (constrain (constrain (read-puzzle "resources/puzzles/easy.txt"))))))
 
+(deftest find-easiest-unsolved-square
+  (is (#{"D3" "D2"}
+       (easiest-square (read-puzzle "resources/puzzles/four_by_four.txt")))))
+
 (run-tests)

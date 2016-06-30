@@ -133,6 +133,24 @@
       assign-sole-candidate-values)
   )
 
+(defn easiest-square [puzzle]
+  (->> puzzle
+       (sort-by (comp count last))
+       (drop-while #(= 1 (count (last %))))
+       (first)
+       (first)))
+
+(defn search [puzzle]
+  ;; if puzzle is solved, return it
+  ;; if puzzle has any contradictions, return false/nil
+  ;; if puzzle is false/nil...? (need this case?)
+
+  ;; otherwise keep going down the search:
+  ;; - pick the next easiest square
+  ;; - pick one of its possibilities and assign it
+  ;; - then constrain the puzzle
+  ;; - then keep searching...
+  )
 
 ;; 4x4
 ;; A1 A2 A3 A4
