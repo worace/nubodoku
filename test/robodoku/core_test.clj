@@ -1,9 +1,13 @@
 (ns robodoku.core-test
   (:require [clojure.test :refer :all]
             [clojure.java.io :as io]
+            [clojure.repl :refer [doc]]
             [clojure.tools.namespace.repl :refer [refresh]]
             [clojure.pprint :refer [pprint]]
             [robodoku.core :refer :all]))
+
+(def fbf (read-puzzle "four_by_four.txt"))
+(def nbn (read-puzzle "easy.txt"))
 
 (deftest reading-a-puzzle
   (let [p (read-puzzle "four_by_four.txt")]
@@ -24,6 +28,7 @@
   (is (= #{"B1" "C1" "D1" "E1" "F1" "G1" "H1" "I1"} (col "A1" 9)))
   (is (= #{"A2" "B1" "B2"} (block "A1" 4)))
   (is (= #{"A2" "A3" "B1" "B2" "B3" "C1" "C2" "C3"} (block "A1" 9)))
+
   (is (= #{"A2" "A3" "A4"
            "B1" "C1" "D1"
            "B2"} (peers "A1" 4)))
@@ -46,7 +51,12 @@
   (is (= #{#{"A2" "A3" "A4"}
            #{"B1" "C1" "D1"}
            #{"A2" "B1" "B2"}}
-         (units "A1" 4))))
+         (units "A1" 4)))
+
+  (is (= #{#{"A1" "A2" "A3" "A4"}
+           #{"A1" "B1" "C1" "D1"}
+           #{"A1" "A2" "B1" "B2"}}
+         (units-containing (read-puzzle "four_by_four.txt") "A1"))))
 
 (deftest units-for-a-whole-puzzle
   (let [p (read-puzzle "four_by_four.txt")]
@@ -113,7 +123,7 @@
                      (file-seq)
                      (drop 1)
                      (map #(.getName %)))]
-    (doseq [fname puzzles]
+    #_(doseq [fname puzzles]
       (println "Attempting puzzle" fname "...")
       (let [puzzle (read-puzzle fname puzzle-dir)
             solution (read-puzzle fname solution-dir)]
