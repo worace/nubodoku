@@ -1,0 +1,15 @@
+* Robodoku
+
+Programatically solve Sudoku puzzles. Implements the constraint propagation / tree-recursive search algorithm described by Peter Norvig in his [[http://norvig.com/sudoku.html][Solving Every Sudoku Puzzle]] blog post.
+
+Run tests:
+
+#+BEGIN_EXAMPLE
+lein test
+#+END_EXAMPLE
+
+Watch it solve a bunch of puzzles:
+
+#+BEGIN_EXAMPLE
+lein run
+#+END_EXAMPLE
