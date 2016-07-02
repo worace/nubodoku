@@ -1,5 +1,6 @@
 (ns robodoku.core
   (:require [clojure.string :refer [split join]]
+            [clojure.java.io :as io]
             [clojure.set :refer [union difference]]))
 
 (defn sqrt [num] (int (Math/sqrt num)))
@@ -136,14 +137,12 @@
        (reduce merge)
        (reduce (fn [puzzle [square value]]
                  (assoc puzzle square #{value}))
-               puzzle)
-       ))
+               puzzle)))
 
 (defn constrain [puzzle]
   (-> puzzle
       eliminate-fixed-values-from-peers
-      assign-sole-candidate-values)
-  )
+      assign-sole-candidate-values))
 
 (defn easiest-square [puzzle]
   (->> puzzle
@@ -180,10 +179,35 @@
        (every? (fn [u-values] (= u-values
                                  (sort (square-values (size puzzle))))))))
 
+(defn row-string [puzzle width row]
+  (->> row
+       (sort)
+       (map puzzle)
+       (map (partial apply str))
+       (map #(format (str "%" width "s") %))
+       (partition 3)
+       (map #(join " " %))
+       (join " | ")))
+
+(defn display [puzzle]
+  (let [width (apply max (map count (vals puzzle)))
+        line-sep (str "\n"
+                      (apply str (take (+ 3
+                                          (* 9 (inc width)))
+                                       (repeat "-")))
+                      "\n")]
+    (->> puzzle
+         rows
+         (map (partial row-string puzzle width))
+         (partition (sqrt (size puzzle)))
+         (map #(join "\n" %))
+         (join (str line-sep))
+         )))
+
 (defn search [puzzle]
   (cond
-    (solved? puzzle) puzzle
     (contradictory? puzzle) nil
+    (solved? puzzle) puzzle
     :else (let [ez-sq (easiest-square puzzle)
                 possibilities (puzzle ez-sq)]
             (some (fn [value]
@@ -197,3 +221,21 @@
   (-> puzzle
       constrain
       search))
+
+(defn solve-bunch-of-puzzles []
+  (let [puzzle-dir "resources/examples-with-solutions/puzzles"
+        solution-dir "resources/examples-with-solutions/solutions"
+        puzzles (->> puzzle-dir
+                     (io/file)
+                     (file-seq)
+                     (drop 1)
+                     (map #(.getName %)))]
+    (doseq [fname puzzles]
+      (println "Attempting puzzle" fname "...")
+      (let [puzzle (read-puzzle fname puzzle-dir)
+            solved (solve puzzle)
+            solution (read-puzzle fname solution-dir)]
+        (println (display solved))
+        (assert (= solution solved))))))
+
+(defn -main [& args] (solve-bunch-of-puzzles))

@@ -115,7 +115,7 @@
                       constrain))))
     (is (= s (solve p)))))
 
-(deftest solve-bunch-of-puzzles
+#_(deftest solve-bunch-of-puzzles
   (let [puzzle-dir "resources/examples-with-solutions/puzzles"
         solution-dir "resources/examples-with-solutions/solutions"
         puzzles (->> puzzle-dir
@@ -123,7 +123,7 @@
                      (file-seq)
                      (drop 1)
                      (map #(.getName %)))]
-    #_(doseq [fname puzzles]
+    (doseq [fname puzzles]
       (println "Attempting puzzle" fname "...")
       (let [puzzle (read-puzzle fname puzzle-dir)
             solution (read-puzzle fname solution-dir)]
